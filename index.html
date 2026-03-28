@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarot with Polar - ดูดวงไพ่ทาโรต์</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Mitr:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* ปรับโทนสีหลักเป็น ม่วง ฟ้า เหลือง */
+            --bg-main: #f5f3ff;
+            --paper: #ffffff;
+            --text-dark: #3730a3;
+            --text-light: #6366f1;
+            --accent-pink: #8b5cf6; /* ตัวแปรชื่อเดิมแต่เปลี่ยนเป็นสีม่วง */
+            --accent-yellow: #fef08a;
+            --mint: #7dd3fc;
+            --peach: #93c5fd;
+            --sky: #bfdbfe;
+            --line-color: rgba(139, 92, 246, 0.2);
+        }
+
+        body {
+            background-color: var(--bg-main);
+            background-image: repeating-linear-gradient(to right, #f5f3ff, #f5f3ff 40px, #ede9fe 40px, #ede9fe 80px);
+            font-family: 'Mitr', sans-serif;
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        .font-fredoka { font-family: 'Fredoka', sans-serif; }
+
+        .paper-container {
+            background-color: var(--paper);
+            position: relative;
+            background-image: repeating-linear-gradient(to bottom, transparent, transparent 35px, var(--line-color) 35px, var(--line-color) 36px);
+            background-position: top 40px center;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+        }
+
+        .jagged-top {
+            position: absolute;
+            top: -12px; left: 0; width: 100%; height: 13px;
+            background: linear-gradient(-45deg, transparent 9px, var(--paper) 0), linear-gradient(45deg, transparent 9px, var(--paper) 0);
+            background-size: 18px 18px;
+            background-repeat: repeat-x;
+        }
+
+        .jagged-bottom {
+            position: absolute;
+            bottom: -12px; left: 0; width: 100%; height: 13px;
+            background: linear-gradient(-45deg, var(--paper) 9px, transparent 0), linear-gradient(45deg, var(--paper) 9px, transparent 0);
+            background-size: 18px 18px;
+            background-repeat: repeat-x;
+        }
+
+        .polaroid {
+            background: #fff;
+            padding: 8px 8px 35px 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 1px solid #e2e8f0;
+            position: relative;
+        }
+        @media (min-width: 640px) { .polaroid { padding: 10px 10px 45px 10px; } }
+
+        /* Realistic Tape Effects (Multiply blend makes it look like real translucent tape) */
+        .tape {
+            position: absolute;
+            mix-blend-mode: multiply;
+            opacity: 0.85;
+            z-index: 20;
+        }
+        /* รอยฉีกแบบเทปกระดาษ */
+        .tape-1 { clip-path: polygon(1% 2%, 99% 0%, 98% 98%, 0% 100%); }
+        .tape-2 { clip-path: polygon(0% 0%, 100% 1%, 99% 100%, 2% 99%); }
+        .tape-3 { clip-path: polygon(2% 1%, 98% 2%, 100% 99%, 0% 98%); }
+        
+        /* เปลี่ยนสีเทปให้ตรงธีม */
+        .bg-tape-pink { background-color: #c4b5fd; } /* เทปสีม่วง */
+        .bg-tape-yellow { background-color: #fef08a; } /* เทปสีเหลือง */
+        .bg-tape-mint { background-color: #bae6fd; } /* เทปสีฟ้า */
+        .bg-tape-blue { background-color: #a78bfa; } /* เทปสีม่วงเข้ม */
+
+        /* Floating Animation for Hearts & Stars */
+        @keyframes float-anim {
+            0%, 100% { transform: translateY(0) scale(1) rotate(var(--rot, 0deg)); }
+            50% { transform: translateY(-6px) scale(1.05) rotate(calc(var(--rot, 0deg) + 5deg)); }
+        }
+        .decor-float {
+            animation: float-anim 3.5s ease-in-out infinite;
+            pointer-events: none; /* ป้องกันการกดโดน */
+        }
+        .delay-1 { animation-delay: 0.5s; }
+        .delay-2 { animation-delay: 1.5s; }
+
+        .dotted-leader { flex-grow: 1; border-bottom: 2px dotted var(--text-light); margin: 0 8px; opacity: 0.3; transform: translateY(-4px); }
+
+        .modal-overlay { background-color: rgba(55, 48, 163, 0.4); backdrop-filter: blur(4px); }
+
+        .portfolio-card { cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .portfolio-card:hover { transform: translateY(-5px); }
+
+        .link-item {
+            display: block; width: 100%; padding: 12px; margin-bottom: 8px; background: white;
+            border-radius: 12px; border: 1.5px solid var(--line-color); color: var(--text-dark);
+            font-size: 0.85rem; transition: all 0.2s; text-align: center; font-weight: 500;
+        }
+        .link-item:hover { background: var(--bg-main); border-color: var(--accent-pink); }
+    </style>
+</head>
+<body class="min-h-screen py-6 sm:py-10 px-2 sm:px-4 md:px-8 relative selection:bg-[#fef08a] selection:text-[#3730a3]">
+
+    <svg class="decor-float delay-2 fixed top-10 left-5 w-10 h-10 text-[#7dd3fc] opacity-40 z-0" style="--rot: -12deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+
+    <div class="max-w-5xl mx-auto flex flex-col gap-8 sm:gap-12 items-center w-full">
+        
+        <div class="w-full flex flex-row justify-between items-stretch gap-2 sm:gap-10 mt-2 sm:mt-6 relative z-20 px-1 sm:px-4">
+            
+            <div class="relative flex-[1.6] sm:flex-1 flex flex-col">
+                <div class="absolute inset-0 bg-[#c4b5fd] transform rotate-[-1deg] translate-x-[-4px] translate-y-[6px] sm:translate-x-[-8px] sm:translate-y-[12px] opacity-80 z-0 rounded-md"></div>
+                <div class="bg-white relative z-10 p-3 sm:p-10 transform rotate-[-0.5deg] rounded-md shadow-sm border border-gray-100/50 flex-1 flex flex-col justify-center">
+                    
+                    <div class="tape bg-tape-pink tape-1 -top-4 left-1/2 transform -translate-x-1/2 rotate-1 w-24 sm:w-32 h-6 sm:h-8"></div>
+                    
+                    <svg class="decor-float absolute top-4 sm:top-8 right-4 sm:right-8 w-4 sm:w-6 h-4 sm:h-6 text-[#93c5fd] opacity-80 z-20" style="--rot: 15deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+
+                    <div class="space-y-2 sm:space-y-6 pt-2">
+                        <div>
+                            <h2 class="font-fredoka text-[#3730a3] font-bold text-[12px] sm:text-3xl uppercase tracking-tight leading-none">TAROT WITH POLAR</h2>
+                            <p class="mt-1 sm:mt-3 text-[#3730a3] text-[9px] sm:text-base font-medium leading-tight">
+                                ดูดวงไพ่ทาโรต์เน้นให้คำปรึกษา ฮีลใจ •ᴗ• ♡
+                            </p>
+                        </div>
+                        
+                        <div class="text-[#6366f1] text-[8px] sm:text-sm leading-tight sm:leading-relaxed bg-[#f5f3ff] p-2 sm:p-5 rounded-lg border border-[#ddd6fe]/30 relative">
+                            <svg class="decor-float delay-1 absolute -top-2 -right-2 w-4 h-4 text-[#fef08a]" style="--rot: 25deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+
+                            <p class="font-bold text-[#3730a3] mb-1 uppercase text-[8px] sm:text-xs">บริการดูดวง:</p>
+                            <ul class="list-none space-y-0.5 sm:space-y-1.5 font-medium">
+                                <li>- รับดูดวงด้วยไพ่ทาโรต์/ ออราเคิล เริ่มต้น 59.-</li>
+                                <li>- วอลเสริมดวง เริ่มต้น 99.-</li>
+                                <li>- เลขเสริมดวง เริ่มต้น 99.-</li>
+                                <li>- จัดเบอร์โทร เริ่มต้น 199.-</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="text-center">
+                            <p class="text-[7px] sm:text-xs text-[#6366f1] font-medium border-t border-dashed border-[#ddd6fe] pt-1 sm:pt-4 italic">
+                                เน้นให้คำปรึกษา เป็นกันเอง 💜
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative flex-1 flex flex-col items-center shrink-0 pt-2">
+                <div class="relative bg-white border border-[#8b5cf6] sm:border-2 rounded-full px-2 sm:px-5 py-0.5 sm:py-1.5 mb-2 sm:mb-4 z-30 transform rotate-2 shadow-sm">
+                    <span class="font-fredoka text-[#8b5cf6] text-[7px] sm:text-[11px] font-bold tracking-wide uppercase">TAROT WITH POLAR</span>
+                </div>
+
+                <div class="polaroid transform rotate-[-3deg] w-full max-w-[110px] sm:max-w-[240px] z-10 border border-white sm:border-2">
+                    <div class="tape bg-tape-mint tape-2 -top-3 left-1/2 transform -translate-x-1/2 rotate-2 w-12 sm:w-20 h-4 sm:h-6"></div>
+                    <div class="tape bg-tape-yellow tape-3 -bottom-2 -left-2 transform -rotate-12 w-8 sm:w-12 h-3 sm:h-5"></div>
+
+                    <svg class="decor-float absolute -left-3 sm:-left-6 top-10 sm:top-20 w-5 sm:w-8 h-5 sm:h-8 text-[#8b5cf6] opacity-70 z-20" style="--rot: -20deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+
+                    <div class="w-full aspect-[4/5] bg-[#fffdf0] overflow-hidden rounded-sm relative border border-[#fef08a]/30">
+                        <img src="https://drive.google.com/uc?export=view&id=1TdNKhubXil3bmH-p-ntpp1Odb7eISFDz" alt="Tarot with Polar Logo" class="w-full h-full object-cover">
+                    </div>
+                    <div class="absolute bottom-1 sm:bottom-3 right-0 bg-[#3730a3] text-white px-2 sm:px-4 py-0.5 sm:py-1.5 text-[5px] sm:text-[9px] font-fredoka font-bold rounded-l-md tracking-tighter sm:tracking-widest shadow-md">
+                        WELCOME TO TAROT WITH POLAR
+                    </div>
+                </div>
+                
+                <svg class="decor-float delay-1 absolute top-10 -right-4 w-6 h-6 text-[#7dd3fc] opacity-80 z-0" style="--rot: 12deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            </div>
+        </div>
+
+        <div class="paper-container w-full rounded-sm pt-12 sm:pt-16 pb-16 sm:pb-20 px-4 sm:px-10 lg:px-16 z-10 relative mt-6 sm:mt-10">
+            <div class="jagged-top"></div>
+            <div class="jagged-bottom"></div>
+            
+            <div class="tape bg-tape-yellow tape-2 -top-3 -left-4 transform -rotate-3 w-24 sm:w-36 h-6 sm:h-8 z-20"></div>
+            
+            <svg class="decor-float absolute top-10 right-8 sm:right-24 w-5 sm:w-8 h-5 sm:h-8 text-[#fef08a] drop-shadow-sm z-0" style="--rot: 25deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+
+            <svg class="decor-float delay-1 absolute top-20 left-4 sm:left-12 w-4 sm:w-6 h-4 sm:h-6 text-[#8b5cf6] opacity-60 z-0" style="--rot: -15deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+
+            <div class="absolute -top-4 right-4 bg-white border-2 border-[#8b5cf6] rounded-full px-3 sm:px-5 py-1 z-20 flex items-center shadow-sm">
+                <span class="font-fredoka text-[#8b5cf6] text-[8px] sm:text-xs font-bold tracking-wider uppercase leading-none">OPEN EVERYDAY</span>
+            </div>
+
+            <div class="mb-10 sm:mb-14 pt-2 relative z-10">
+                <h1 class="font-fredoka text-[#3730a3] text-3xl sm:text-5xl font-black tracking-tighter uppercase leading-none">TAROT READER</h1>
+                <div class="flex gap-2 mt-2 opacity-60">
+                    <svg class="w-4 h-4 text-[#8b5cf6]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    <svg class="w-4 h-4 text-[#fef08a]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                </div>
+            </div>
+
+            <div class="space-y-12 sm:space-y-16">
+                
+                <div class="schedule-item flex relative">
+                    <div class="w-8 sm:w-12 pt-1 shrink-0 font-fredoka text-[#8b5cf6] font-bold text-lg sm:text-2xl leading-none">01.</div>
+                    <div class="flex-1">
+                        <div class="flex items-center w-full mb-6">
+                            <h2 class="font-fredoka text-[#3730a3] font-bold text-base sm:text-xl uppercase tracking-wider">REVIEWS & FEEDBACK</h2>
+                            <div class="dotted-leader"></div>
+                        </div>
+                        
+                        <p class="text-[10px] sm:text-xs text-[#6366f1] mb-6 italic">*คลิกที่หมวดหมู่เพื่อดูรีวิวของร้าน (ป๊อบอัพ)</p>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                            <div onclick="openModal('modal-bright')" class="portfolio-card bg-[#fffcf0] p-6 sm:p-10 rounded-2xl border-2 border-[#fef08a] shadow-sm flex flex-col items-center relative">
+                                <svg class="decor-float delay-2 absolute bottom-3 left-3 w-4 h-4 text-[#fef08a]" style="--rot: -10deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <div class="bg-[#fef08a] text-[#3730a3] px-4 py-1 rounded-full text-[9px] sm:text-[10px] font-bold border-2 border-white mb-3 relative z-10">ดูดวงทั่วไป</div>
+                                <span class="text-xs sm:text-sm font-bold text-[#3730a3] relative z-10">คลิกดูรีวิวดูดวง</span>
+                            </div>
+                            <div onclick="openModal('modal-dark')" class="portfolio-card bg-[#f5f8ff] p-6 sm:p-10 rounded-2xl border-2 border-[#7dd3fc] shadow-sm flex flex-col items-center relative">
+                                <svg class="decor-float absolute top-4 right-4 w-3 h-3 text-[#7dd3fc]" style="--rot: 20deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <div class="bg-[#7dd3fc] text-[#3730a3] px-4 py-1 rounded-full text-[9px] sm:text-[10px] font-bold border-2 border-white mb-3 relative z-10">วอลเปเปอร์</div>
+                                <span class="text-xs sm:text-sm font-bold text-[#3730a3] relative z-10">คลิกดูรีวิววอลเปเปอร์</span>
+                            </div>
+                            <div onclick="openModal('modal-pastel')" class="portfolio-card bg-[#f5f3ff] p-6 sm:p-10 rounded-2xl border-2 border-[#ddd6fe] shadow-sm flex flex-col items-center relative">
+                                <svg class="decor-float delay-1 absolute top-5 left-5 w-4 h-4 text-[#ddd6fe]" style="--rot: -15deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                <div class="bg-[#ddd6fe] text-[#3730a3] px-4 py-1 rounded-full text-[9px] sm:text-[10px] font-bold border-2 border-white mb-3 relative z-10">เบอร์มงคล</div>
+                                <span class="text-xs sm:text-sm font-bold text-[#3730a3] relative z-10">คลิกดูรีวิวเบอร์มงคล</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="schedule-item flex relative">
+                    <svg class="decor-float absolute -left-2 top-10 w-5 h-5 text-[#fef08a]" style="--rot: -10deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    
+                    <div class="w-8 sm:w-12 pt-1 shrink-0 font-fredoka text-[#8b5cf6] font-bold text-lg sm:text-2xl leading-none">02.</div>
+                    <div class="flex-1">
+                        <h2 class="font-fredoka text-[#3730a3] font-bold text-base sm:text-xl uppercase tracking-wider mb-5">Conditions & Details</h2>
+                        <div class="bg-[#fffdf0] p-5 sm:p-8 rounded-2xl border-2 border-[#fef08a] shadow-sm space-y-8 relative">
+                            <div class="tape bg-tape-yellow tape-1 -top-3 left-6 transform rotate-2 w-20 h-5"></div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start relative z-10">
+                                <div class="space-y-4">
+                                    <div class="border-b-2 border-dashed border-[#fef08a] pb-2">
+                                        <p class="text-[#3730a3] font-bold text-lg leading-none">เงื่อนไขการรับดูดวง</p>
+                                        <p class="text-[10px] sm:text-xs text-[#6366f1] font-medium mt-1">(โปรดอ่านทำความเข้าใจก่อนจองคิวนะคะ)</p>
+                                    </div>
+                                    <ul class="text-xs sm:text-sm space-y-2 font-medium text-[#3730a3]">
+                                        <li class="flex justify-between"><span>- ไม่รับดูเรื่อง: ความตาย</span> <span class="font-bold">❌</span></li>
+                                        <li class="flex justify-between"><span>- สิ่งลี้ลับ, ไสยศาสตร์/ของขลัง</span> <span class="font-bold">❌</span></li>
+                                        <li class="flex justify-between"><span>- โรคภัยร้ายแรง</span> <span class="font-bold">❌</span></li>
+                                        <li class="flex justify-between"><span>- ขอสงวนสิทธิ์คำถามละเอียดอ่อนอื่น ๆ(สอบถามก่อนได้ค่ะ)</span> <span class="font-bold">❌</span></li>
+                                    </ul>
+                                </div>
+                                <div class="space-y-4 relative">
+                                    <svg class="decor-float delay-1 absolute -top-5 right-2 w-4 h-4 text-[#93c5fd]" style="--rot: 15deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                    
+                                    <div class="bg-white/80 p-4 rounded-xl border-2 border-[#93c5fd]/30 flex flex-col items-center justify-center text-center h-full relative">
+                                        <div class="tape bg-tape-pink tape-2 -top-3 left-1/2 transform -translate-x-1/2 rotate-1 w-16 h-4"></div>
+                                        <p class="text-[11px] sm:text-sm font-bold text-[#3730a3] leading-tight mt-1">ระยะเวลา</p>
+                                        <p class="text-[11px] sm:text-sm font-bold text-[#3730a3] leading-tight">รอคิวตอบแบบ Text</p>
+                                        <span class="text-[#8b5cf6] font-bold text-xl sm:text-2xl mt-1 tracking-tight">ภายใน 24 ชม.</span>
+                                    </div>
+                                    <div class="bg-[#eff6ff] p-4 rounded-xl text-[10px] sm:text-[11px] leading-relaxed text-[#1e40af] border border-[#93c5fd]/20 relative">
+                                        <div class="tape bg-tape-mint tape-3 -top-2 -right-3 transform rotate-12 w-10 h-3"></div>
+                                        <p class="font-bold uppercase mb-1">คิว Call/ Chat:</p>
+                                        <p>- จองล่วงหน้า 1 วัน</p>
+                                        <p>- หากรีบ สามารถเช็คคิวว่างก่อนได้ค่ะ</p>
+                                        <p>- ทยอยตอบตามคิวนะคะ การันตีไม่เกินนี้ค่า</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-[10px] text-[#6366f1] italic text-center border-t border-[#fef08a] pt-4 relative z-10"># หากมีข้อสงสัยเพิ่มเติม สามารถทักมาสอบถามทางร้านก่อนได้เลยค่ะ #</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
+                    <div class="flex">
+                        <div class="w-8 sm:w-12 pt-1 shrink-0 font-fredoka text-[#8b5cf6] font-bold text-lg sm:text-2xl leading-none">03.</div>
+                        <div class="flex-1">
+                            <h2 class="font-fredoka text-[#3730a3] font-bold text-base sm:text-xl uppercase tracking-wider mb-4">How to book</h2>
+                            <div class="bg-[#ecfeff] p-5 sm:p-6 rounded-2xl border-2 border-[#67e8f9] text-xs sm:text-sm space-y-4 relative">
+                                <div class="tape bg-tape-mint tape-1 -top-2 -right-4 transform rotate-6 w-16 h-4"></div>
+                                <svg class="decor-float delay-2 absolute bottom-4 right-4 w-4 h-4 text-[#67e8f9]" style="--rot: -20deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                
+                                <p class="font-bold text-[#0891b2] relative z-10">ขั้นตอนการจอง:</p>
+                                <ol class="list-decimal pl-5 space-y-2 text-[#06b6d4] font-medium relative z-10">
+                                    <li>เลือกแพ็คที่สนใจ</li>
+                                    <li>ชำระเงินได้ที่ KBank: 228-3-50355-3 ภิญญาพัชญ์ ยุ้งแก้ว</li>
+                                    <li>ส่งสลิป + แจ้งข้อมูลทิ้งไว้ได้เลยค่า</li>
+                                    <li>รอรับคำทำนายภายใน 24 ชม. ค่า</li>
+                                </ol>
+                                <p class="text-[9px] text-[#0891b2] border-t border-dashed border-[#67e8f9] pt-2 relative z-10"># จองคิวแล้วรบกวนส่งสลิปเพื่อคอนเฟิร์มคิวนะคะ #</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex">
+                        <div class="w-8 sm:w-12 pt-1 shrink-0 font-fredoka text-[#8b5cf6] font-bold text-lg sm:text-2xl leading-none">04.</div>
+                        <div class="flex-1">
+                            <h2 class="font-fredoka text-[#3730a3] font-bold text-base sm:text-xl uppercase tracking-wider mb-4">Rules</h2>
+                            <div class="bg-[#eff6ff] p-5 sm:p-6 rounded-2xl border-2 border-[#93c5fd] text-xs sm:text-sm space-y-3 relative">
+                                <div class="tape bg-tape-pink tape-2 -top-2 -left-4 transform -rotate-12 w-16 h-4"></div>
+                                <svg class="decor-float absolute top-4 right-4 w-4 h-4 text-[#93c5fd]" style="--rot: 15deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+
+                                <ul class="list-disc pl-5 space-y-2 font-medium text-[#1e40af] relative z-10">
+                                    <li>เริ่มเปิดไพ่แล้ว ไม่รับคืนเงิน ทุกกรณี</li>
+                                    <li>ดวง 30% การกระทำ 70% ผลลัพธ์เปลี่ยนได้ขึ้นอยู่กับตัวเราค่ะ</li>
+                                    <li>สำหรับการดูดวงแบบจองล่วงหน้า: สายเกิน 5 นาที → ตัดเวลาในส่วนที่เกิน</li>
+                                    <li>สายเกิน 10 นาที (ไม่แจ้ง) → ยกเลิกคิวและไม่คืนเงิน</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex relative">
+                    <svg class="decor-float delay-1 absolute -left-4 top-1/2 w-6 h-6 text-[#8b5cf6] opacity-50" style="--rot: 20deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                    
+                    <div class="w-8 sm:w-12 pt-1 shrink-0 font-fredoka text-[#8b5cf6] font-bold text-lg sm:text-2xl leading-none">05.</div>
+                    <div class="flex-1">
+                        <h2 class="font-fredoka text-[#3730a3] font-bold text-base sm:text-xl uppercase tracking-wider mb-4">Tarot with Polar</h2>
+                        <div class="bg-gradient-to-br from-[#f5f3ff] to-[#e0e7ff] p-6 sm:p-8 rounded-3xl border-2 border-[#ddd6fe] flex flex-col sm:flex-row items-center gap-6 shadow-sm relative">
+                            <div class="tape bg-tape-pink tape-3 -top-3 left-1/2 transform -translate-x-1/2 -rotate-2 w-24 h-5"></div>
+                            
+                            <div class="flex-1 text-center sm:text-left relative z-10">
+                                <h3 class="text-base sm:text-xl font-bold text-[#3730a3]">ดูรีวิวดูดวงกับ Tarot with Polar ได้ที่ Instagram</h3>
+                                <p class="text-[10px] sm:text-sm text-[#6366f1] mt-2 font-medium">ฝากติดตามด้วยนะคะ ♡</p>
+                                <div class="mt-4 flex items-baseline gap-3 justify-center md:justify-start">
+                                    <span class="text-2xl sm:text-3xl font-black text-[#8b5cf6]">59.-</span>
+                                    <span class="text-[10px] sm:text-sm line-through text-[#6366f1]">เริ่มต้นคุ้มค่าแน่นอน</span>
+                                    <svg class="decor-float absolute top-0 -right-4 w-4 h-4 text-[#fef08a]" style="--rot: -10deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                </div>
+                            </div>
+                            <div class="flex flex-col gap-2 shrink-0 w-full md:w-auto relative z-10">
+                                <a href="https://www.instagram.com/tarot.with.polar/" target="_blank" class="bg-[#8b5cf6] text-white px-8 py-3 rounded-full text-[10px] sm:text-xs font-bold shadow-md hover:scale-105 transition text-center uppercase tracking-widest">คลิกดูรีวิวใน IG</a>
+                                <a href="https://lin.ee/E6Dd0Hf" target="_blank" class="text-[9px] sm:text-[10px] text-[#6366f1] underline text-center font-bold">สอบถามรายละเอียดเพิ่มเติม</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex relative">
+                    <div class="w-8 sm:w-12 pt-1 shrink-0 font-fredoka text-[#8b5cf6] font-bold text-lg sm:text-2xl leading-none">06.</div>
+                    <div class="flex-1">
+                        <h2 class="font-fredoka text-[#3730a3] font-bold text-xl uppercase tracking-wider mb-8 flex items-center gap-4">Our Services</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-[10px] sm:text-xs">
+                            <div class="bg-white border-2 border-[#ddd6fe] rounded-3xl p-5 flex flex-col hover:shadow-lg transition relative">
+                                <div class="tape bg-tape-pink tape-1 -top-2 -right-3 transform rotate-6 w-14 h-4"></div>
+                                <svg class="decor-float absolute bottom-4 right-4 w-3 h-3 text-[#ddd6fe]" style="--rot: -15deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+
+                                <h3 class="text-[#8b5cf6] font-black text-sm mb-4 border-b border-indigo-50 pb-2 relative z-10">ทาโรต์ / ออราเคิล</h3>
+                                <p class="text-[#6366f1] font-bold mb-2 uppercase text-[9px] relative z-10">Online</p>
+                                <ul class="space-y-1.5 text-[#3730a3] font-medium flex-1 mb-6 relative z-10">
+                                    <li>- ปรึกษาปัญหาชีวิต</li>
+                                    <li>- เช็คดวงชะตารายเดือน</li>
+                                    <li>- ฮีลใจให้คำแนะนำ</li>
+                                </ul>
+                                <div class="mt-auto space-y-1 font-black text-[#8b5cf6] relative z-10">
+                                    <div class="flex justify-between border-b border-indigo-50 py-1"><span>เริ่มต้นที่</span> <span>59.-</span></div>
+                                    <div class="flex justify-between border-b border-indigo-50 py-1"><span>แพ็คเกจ A</span> <span>159.-</span></div>
+                                    <div class="flex justify-between pt-1"><span>แพ็คเกจ B</span> <span>299.-</span></div>
+                                </div>
+                            </div>
+                            <div class="bg-white border-2 border-[#7dd3fc] rounded-3xl p-5 flex flex-col hover:shadow-lg transition relative">
+                                <div class="tape bg-tape-blue tape-2 -top-2 left-1/2 transform -translate-x-1/2 -rotate-3 w-16 h-4"></div>
+                                <svg class="decor-float delay-1 absolute top-4 right-4 w-3 h-3 text-[#7dd3fc]" style="--rot: 20deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+
+                                <h3 class="text-[#3b82f6] font-black text-sm mb-4 border-b border-cyan-50 pb-2 relative z-10">Lucky Wallpaper</h3>
+                                <p class="text-[#3b82f6] opacity-70 mb-2 uppercase text-[9px] relative z-10">วอลเปเปอร์เสริมดวง</p>
+                                <ul class="space-y-1.5 text-[#3b82f6] font-medium flex-1 mb-6 relative z-10">
+                                    <li>- เสริมดวงการเงิน</li>
+                                    <li>- เสริมดวงความรัก</li>
+                                    <li>- เสริมดวงการงาน</li>
+                                </ul>
+                                <div class="mt-auto space-y-1 font-black text-[#3b82f6] relative z-10">
+                                    <div class="flex justify-between border-b border-cyan-50 py-1"><span>เริ่มต้นที่</span> <span>99.-</span></div>
+                                    <div class="flex justify-between border-b border-cyan-50 py-1"><span>เพิ่มชื่อ/รูป</span> <span>129.-</span></div>
+                                    <div class="flex justify-between pt-1"><span>ปรับแก้ดีไซน์</span> <span>159.-</span></div>
+                                </div>
+                            </div>
+                            <div class="bg-white border-2 border-[#fef08a] rounded-3xl p-5 flex flex-col hover:shadow-lg transition relative">
+                                <div class="tape bg-tape-yellow tape-3 -top-2 -left-3 transform -rotate-6 w-14 h-4"></div>
+                                <svg class="decor-float delay-2 absolute bottom-4 left-4 w-3 h-3 text-[#fef08a]" style="--rot: -10deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+
+                                <h3 class="text-[#ca8a04] font-black text-sm mb-4 border-b border-yellow-50 pb-2 relative z-10">Lucky Numbers</h3>
+                                <p class="text-[#ca8a04] opacity-70 mb-2 uppercase text-[9px] relative z-10">เลขมงคล/เบอร์โทร</p>
+                                <ul class="space-y-1.5 text-[#ca8a04] font-medium flex-1 mb-6 relative z-10">
+                                    <li>- จัดเบอร์โทรศัพท์ใหม่</li>
+                                    <li>- วิเคราะห์เบอร์เดิม</li>
+                                    <li>- เลขมงคลรอบตัว</li>
+                                </ul>
+                                <div class="mt-auto space-y-1 font-black text-[#ca8a04] relative z-10">
+                                    <div class="flex justify-between border-b border-yellow-50 py-1"><span>เลขเสริมดวง</span> <span>99.-</span></div>
+                                    <div class="flex justify-between border-b border-yellow-50 py-1"><span>วิเคราะห์เบอร์</span> <span>199.-</span></div>
+                                    <div class="flex justify-between pt-1"><span>จัดเบอร์มงคล</span> <span>599.-</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="mt-6 text-[10px] text-[#6366f1] font-bold text-center italic relative z-10"># ทักมาสอบถามรายละเอียดแต่ละแพ็คเกจได้เลยนะคะ #</p>
+                    </div>
+                </div>
+
+                <div class="flex pt-6 relative">
+                    <svg class="decor-float absolute -left-4 top-10 w-5 h-5 text-[#fef08a]" style="--rot: -15deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    <svg class="decor-float delay-1 absolute right-0 sm:right-10 top-2 w-6 h-6 text-[#8b5cf6] opacity-60" style="--rot: 20deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+
+                    <div class="w-8 sm:w-12 pt-1 shrink-0 font-fredoka text-[#8b5cf6] font-bold text-lg sm:text-2xl leading-none">07.</div>
+                    <div class="flex-1 relative z-10">
+                        <h2 class="font-fredoka text-[#3730a3] font-bold text-base sm:text-xl uppercase tracking-wider mb-8">Contact Us</h2>
+                        <div class="flex flex-wrap gap-4 justify-center md:justify-start">
+                            <a href="https://www.facebook.com/tarot.with.polar" target="_blank" class="bg-[#3730a3] text-white px-8 py-3 rounded-full text-[10px] sm:text-xs font-bold shadow-md hover:bg-[#6366f1] transition border-2 border-[#3730a3] min-w-[140px] text-center uppercase">Facebook</a>
+                            <a href="https://lin.ee/E6Dd0Hf" target="_blank" class="bg-white text-[#3730a3] border-2 border-[#3730a3] px-8 py-3 rounded-full text-[10px] sm:text-xs font-bold shadow-md hover:bg-[#f5f3ff] transition min-w-[140px] text-center uppercase">Line</a>
+                            <a href="https://www.instagram.com/tarot.with.polar/" target="_blank" class="bg-[#8b5cf6] text-white px-8 py-3 rounded-full text-[10px] sm:text-xs font-bold shadow-md hover:bg-[#a78bfa] transition border-2 border-[#8b5cf6] min-w-[140px] text-center uppercase">Instagram</a>
+                        </div>
+                        
+                        <div class="mt-14 relative flex justify-center">
+                            <p class="text-[#3730a3] text-sm font-bold italic text-center relative z-10">ขอบคุณที่ไว้วางใจ Tarot with Polar</p>
+                            <svg class="decor-float delay-2 absolute -right-4 sm:right-1/4 -top-2 w-4 h-4 text-[#7dd3fc]" style="--rot: -10deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            
+            <svg class="decor-float absolute bottom-6 left-8 w-6 h-6 text-[#ddd6fe] opacity-60" style="--rot: -25deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+            <svg class="decor-float delay-1 absolute bottom-10 right-10 w-8 h-8 text-[#bfdbfe] opacity-50" style="--rot: 15deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </div>
+    </div>
+
+    <div id="modal-bright" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl relative border-2 border-[#fef08a]">
+            <h3 class="text-2xl font-bold text-[#3730a3] text-center mb-5">รีวิวดูดวง</h3>
+            <div class="space-y-2">
+                <a href="https://www.instagram.com/tarot.with.polar/" target="_blank" class="link-item">ดูรีวิวได้ที่ Instagram</a>
+                <a href="https://www.instagram.com/tarot.with.polar/" target="_blank" class="link-item">ช่องทางติดต่อหลัก</a>
+            </div>
+            <button onclick="closeModal('modal-bright')" class="mt-6 w-full py-3 rounded-2xl bg-[#3730a3] text-white font-bold text-[10px] uppercase">Close</button>
+        </div>
+    </div>
+
+    <div id="modal-dark" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-[#2e1065] rounded-3xl w-full max-w-sm p-6 shadow-2xl relative border-2 border-[#7dd3fc]">
+            <h3 class="font-fredoka text-xl font-bold text-white text-center mb-5 uppercase">รีวิววอลเปเปอร์</h3>
+            <div class="space-y-2 max-h-[400px] overflow-y-auto pr-1">
+                <a href="https://www.instagram.com/tarot.with.polar/" target="_blank" class="link-item">ดูรีวิวได้ที่ Instagram</a>
+                <a href="https://www.instagram.com/tarot.with.polar/" target="_blank" class="link-item">ตัวอย่างวอลเปเปอร์</a>
+            </div>
+            <button onclick="closeModal('modal-dark')" class="mt-6 w-full py-3 rounded-2xl bg-white text-[#2e1065] font-bold text-[10px] uppercase">Close</button>
+        </div>
+    </div>
+
+    <div id="modal-pastel" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl relative border-2 border-[#ddd6fe]">
+            <h3 class="font-fredoka text-xl font-bold text-[#8b5cf6] text-center mb-5 uppercase">รีวิวเบอร์มงคล</h3>
+            <div class="space-y-2">
+                <a href="https://www.instagram.com/tarot.with.polar/" target="_blank" class="link-item">ดูรีวิวได้ที่ Instagram</a>
+                <a href="https://www.instagram.com/tarot.with.polar/" target="_blank" class="link-item">ข้อมูลเลขมงคลเพิ่มเติม</a>
+            </div>
+            <button onclick="closeModal('modal-pastel')" class="mt-6 w-full py-3 rounded-2xl bg-[#8b5cf6] text-white font-bold text-[10px] uppercase">Close</button>
+        </div>
+    </div>
+
+    <script>
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.body.style.overflow = 'auto'; }
+        window.onclick = function(event) { if (event.target.classList.contains('modal-overlay')) { event.target.classList.add('hidden'); document.body.style.overflow = 'auto'; } }
+    </script>
+</body>
+</html>
