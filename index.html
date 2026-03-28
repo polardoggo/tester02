@@ -211,19 +211,47 @@
                         
                         <p class="text-[10px] sm:text-xs text-[#a5b4fc] mb-6 italic">*คลิกที่หมวดหมู่เพื่อดูรีวิวของร้าน (ป๊อบอัพ)</p>
 
+                        <div class="mb-5">
+                            <div onclick="openModal('modal-all-services')" class="portfolio-card bg-[#1f1a36] p-6 sm:p-10 rounded-2xl border-2 border-[#8b5cf6] shadow-md flex flex-col items-center relative">
+                                <svg class="decor-float delay-1 absolute top-5 right-5 w-5 h-5 text-[#8b5cf6]" style="--rot: 15deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                
+                                <div class="w-full aspect-[4/5] sm:aspect-auto sm:h-64 bg-[#2a2145] rounded-xl mb-4 overflow-hidden border border-[#8b5cf6]/50 flex items-center justify-center relative z-10">
+                                     <span class="text-[#a78bfa] text-sm font-medium">รูปรวมบริการของร้าน</span>
+                                </div>
+
+                                <div class="bg-[#8b5cf6] text-[#130f26] px-6 py-1.5 rounded-full text-[10px] sm:text-xs font-bold border-2 border-[#1f1a36] mb-3 relative z-10">รวมบริการทั้งหมด</div>
+                                <span class="text-xs sm:text-sm font-bold text-[#c4b5fd] relative z-10">คลิกดูรีวิวรวม</span>
+                            </div>
+                        </div>
+
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
                             <div onclick="openModal('modal-bright')" class="portfolio-card bg-[#2e2a14] p-6 sm:p-10 rounded-2xl border-2 border-[#ca8a04] shadow-md flex flex-col items-center relative">
                                 <svg class="decor-float delay-2 absolute bottom-3 left-3 w-4 h-4 text-[#fde047]" style="--rot: -10deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                
+                                <div class="w-full aspect-[4/5] bg-[#3a3518] rounded-xl mb-4 overflow-hidden border border-[#ca8a04]/50 flex items-center justify-center relative z-10">
+                                     <span class="text-[#ca8a04] text-xs font-medium">รูปบริการดูดวง</span>
+                                </div>
+
                                 <div class="bg-[#fde047] text-[#713f12] px-4 py-1 rounded-full text-[9px] sm:text-[10px] font-bold border-2 border-[#2e2a14] mb-3 relative z-10">ดูดวงทั่วไป</div>
                                 <span class="text-xs sm:text-sm font-bold text-[#fde047] relative z-10">คลิกดูรีวิวดูดวง</span>
                             </div>
                             <div onclick="openModal('modal-dark')" class="portfolio-card bg-[#131d33] p-6 sm:p-10 rounded-2xl border-2 border-[#0284c7] shadow-md flex flex-col items-center relative">
                                 <svg class="decor-float absolute top-4 right-4 w-3 h-3 text-[#7dd3fc]" style="--rot: 20deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                
+                                <div class="w-full aspect-[4/5] bg-[#1e293b] rounded-xl mb-4 overflow-hidden border border-[#0284c7]/50 flex items-center justify-center relative z-10">
+                                     <span class="text-[#0284c7] text-xs font-medium">รูปวอลเปเปอร์</span>
+                                </div>
+
                                 <div class="bg-[#0284c7] text-[#e0f2fe] px-4 py-1 rounded-full text-[9px] sm:text-[10px] font-bold border-2 border-[#131d33] mb-3 relative z-10">วอลเปเปอร์</div>
                                 <span class="text-xs sm:text-sm font-bold text-[#7dd3fc] relative z-10">คลิกดูรีวิววอลเปเปอร์</span>
                             </div>
                             <div onclick="openModal('modal-pastel')" class="portfolio-card bg-[#2a2145] p-6 sm:p-10 rounded-2xl border-2 border-[#4c1d95] shadow-md flex flex-col items-center relative">
                                 <svg class="decor-float delay-1 absolute top-5 left-5 w-4 h-4 text-[#c4b5fd]" style="--rot: -15deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                
+                                <div class="w-full aspect-[4/5] bg-[#3b2c5c] rounded-xl mb-4 overflow-hidden border border-[#4c1d95]/50 flex items-center justify-center relative z-10">
+                                     <span class="text-[#4c1d95] text-xs font-medium">รูปเบอร์มงคล</span>
+                                </div>
+
                                 <div class="bg-[#4c1d95] text-[#e0e7ff] px-4 py-1 rounded-full text-[9px] sm:text-[10px] font-bold border-2 border-[#2a2145] mb-3 relative z-10">เบอร์มงคล</div>
                                 <span class="text-xs sm:text-sm font-bold text-[#c4b5fd] relative z-10">คลิกดูรีวิวเบอร์มงคล</span>
                             </div>
@@ -345,7 +373,7 @@
                     <div class="w-8 sm:w-12 pt-1 shrink-0 font-fredoka text-[#a78bfa] font-bold text-lg sm:text-2xl leading-none">06.</div>
                     <div class="flex-1">
                         <h2 class="font-fredoka text-[#e0e7ff] font-bold text-xl uppercase tracking-wider mb-8 flex items-center gap-4">Our Services</h2>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-[10px] sm:text-xs">
+                        <div class="grid grid-cols-1 gap-6 text-[10px] sm:text-xs">
                             <div class="bg-[#231e3d] border-2 border-[#4c1d95] rounded-3xl p-5 flex flex-col hover:shadow-lg transition relative">
                                 <div class="tape bg-tape-pink tape-1 -top-2 -right-3 transform rotate-6 w-14 h-4"></div>
                                 <svg class="decor-float absolute bottom-4 right-4 w-3 h-3 text-[#c4b5fd]" style="--rot: -15deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
@@ -429,6 +457,17 @@
         </div>
     </div>
 
+    <div id="modal-all-services" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-[#1f1a36] rounded-3xl w-full max-w-sm p-6 shadow-2xl relative border-2 border-[#8b5cf6]">
+            <h3 class="text-2xl font-bold text-[#c4b5fd] text-center mb-5">รีวิวรวมบริการ</h3>
+            <div class="space-y-2">
+                <a href="https://www.instagram.com/tarot.with.polar/" target="_blank" class="link-item">ดูรีวิวได้ที่ Instagram</a>
+                <a href="https://www.instagram.com/tarot.with.polar/" target="_blank" class="link-item">ช่องทางติดต่อหลัก</a>
+            </div>
+            <button onclick="closeModal('modal-all-services')" class="mt-6 w-full py-3 rounded-2xl bg-[#8b5cf6] text-[#130f26] font-bold text-[10px] uppercase">Close</button>
+        </div>
+    </div>
+
     <div id="modal-bright" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 modal-overlay">
         <div class="bg-[#2e2a14] rounded-3xl w-full max-w-sm p-6 shadow-2xl relative border-2 border-[#ca8a04]">
             <h3 class="text-2xl font-bold text-[#fde047] text-center mb-5">รีวิวดูดวง</h3>
@@ -469,3 +508,5 @@
     </script>
 </body>
 </html>
+
+ให้กล่อง placeholder ด้านบนสุดนั้นเป็นรูปภาพ แทนที่จะเป็นสี แล้วดึงรูปจากลิ้งนี้ไปใส่ https://images.unsplash.com/photo-1629813204017-d7d8258e72dd?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjZ8fHRhcm90fGVufDB8fDB8fHww
