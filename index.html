@@ -311,15 +311,25 @@
                             <h2 class="font-fredoka text-[#e0e7ff] font-bold text-base sm:text-xl uppercase tracking-wider mb-4">How to book</h2>
                             <div class="bg-[#0f2930] p-5 sm:p-6 rounded-2xl border-2 border-[#0891b2] text-xs sm:text-sm space-y-4 relative shadow-md">
                                 <div class="tape bg-tape-mint tape-1 -top-2 -right-4 transform rotate-6 w-16 h-4"></div>
-                                <svg class="decor-float delay-2 absolute bottom-4 right-4 w-4 h-4 text-[#67e8f9]" style="--rot: -20deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                <svg class="decor-float delay-2 absolute bottom-4 right-4 w-4 h-4 text-[#67e8f9]" style="--rot: -20deg;" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                                 
                                 <p class="font-bold text-[#67e8f9] relative z-10">ขั้นตอนการจอง:</p>
                                 <ol class="list-decimal pl-5 space-y-2 text-[#a5f3fc] font-medium relative z-10">
                                     <li>เลือกแพ็คที่สนใจ</li>
-                                    <li>ชำระเงินได้ที่ KBank: 228-3-50355-3 ภิญญาพัชญ์ ยุ้งแก้ว</li>
+                                    <li class="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+                                        <span>ชำระเงินได้ที่ KBank: 228-3-50355-3 ภิญญาพัชญ์ ยุ้งแก้ว</span>
+                                        <button onclick="copyToClipboard('228-3-50355-3')" class="bg-[#0891b2] text-white px-2 py-0.5 rounded text-[9px] font-bold hover:bg-[#06b6d4] transition shadow-sm border border-[#67e8f9]/50 w-fit">คัดลอกเลขบัญชี</button>
+                                    </li>
                                     <li>ส่งสลิป + แจ้งข้อมูลทิ้งไว้ได้เลยค่า</li>
                                     <li>รอรับคำทำนายภายใน 24 ชม. ค่า</li>
                                 </ol>
+
+                                <div class="mt-3 mb-1 relative z-10 flex justify-start">
+                                    <a href="https://lin.ee/E6Dd0Hf" target="_blank" class="bg-[#22c55e] text-white px-6 py-2 rounded-xl text-[11px] sm:text-xs font-bold shadow-md hover:bg-[#16a34a] transition border border-[#15803d] text-center w-full sm:w-auto">
+                                        จองคิวผ่าน LINE
+                                    </a>
+                                </div>
+
                                 <p class="text-[9px] text-[#67e8f9] border-t border-dashed border-[#0891b2] pt-2 relative z-10"># จองคิวแล้วรบกวนส่งสลิปเพื่อคอนเฟิร์มคิวนะคะ #</p>
                             </div>
                         </div>
@@ -452,6 +462,14 @@
         function openModal(id) { document.getElementById(id).classList.remove('hidden'); document.body.style.overflow = 'hidden'; }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.body.style.overflow = 'auto'; }
         window.onclick = function(event) { if (event.target.classList.contains('modal-overlay')) { event.target.classList.add('hidden'); document.body.style.overflow = 'auto'; } }
+        
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('คัดลอกเลขบัญชีเรียบร้อยแล้ว');
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        }
     </script>
 </body>
 </html>
